@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, Text, TouchableOpacity } from 'react-native';
-
-// Remplacez le chemin d'importation ci-dessous par votre propre implémentation pour récupérer les données des joueurs
-import { getPlayers, Player } from '../api';
+import { View, FlatList, Text, TouchableOpacity, Button } from 'react-native';
+import { getPlayers, Player, mapUltraPositionToPosition } from '../api';
 
 interface PlayerListScreenProps {
   navigation: any;
@@ -10,6 +8,8 @@ interface PlayerListScreenProps {
 
 const PlayerListScreen: React.FC<PlayerListScreenProps> = ({ navigation }) => {
   const [players, setPlayers] = useState<Player[]>([]);
+  const [filteredPlayers, setFilteredPlayers] = useState<Player[]>([]);
+  const [searchName, setSearchName] = useState('');
 
   useEffect(() => {
     fetchPlayers();
@@ -17,8 +17,8 @@ const PlayerListScreen: React.FC<PlayerListScreenProps> = ({ navigation }) => {
 
   const fetchPlayers = async () => {
     try {
-      const data = await getPlayers(); // Utilisez votre propre implémentation pour récupérer les données des joueurs
-      setPlayers(data); // Mise à jour de "players" avec les données reçues
+      const data = await getPlayers();
+      setPlayers(data);
     } catch (error) {
       console.error('Error fetching players:', error);
     }
@@ -28,22 +28,24 @@ const PlayerListScreen: React.FC<PlayerListScreenProps> = ({ navigation }) => {
     navigation.navigate('PlayerDetail', { playerId: player.id });
   };
 
-  const renderItem = ({ item }: { item: Player }) => (
-    <TouchableOpacity onPress={() => handlePlayerPress(item)}>
-      <View>
-        <Text>{item.firstName}</Text>
-        <Text>{item.ultraPosition}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-
   return (
+
     <View>
-      <FlatList
-        data={players}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderItem}
+      <Button
+        title="Go to Club List"
+        onPress={() =>
+          navigation.navigate('ClubDetail', {name: 'ClubDetail'})
+        }
       />
+      {players.map((player) => (
+        <TouchableOpacity key={player.id} onPress={() => handlePlayerPress(player)}>
+          <View>
+            {Object.entries(player).map(([key, value]) => (
+              <Text key={key}>{`${key}: ${value}`}</Text>
+            ))}
+          </View>
+        </TouchableOpacity>
+      ))}
     </View>
   );
 };
